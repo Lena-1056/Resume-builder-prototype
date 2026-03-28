@@ -48,4 +48,4 @@ app.*.map.json
 # Ignore files like analysis, anaylysis_output, issues files
 **/analysis.*
 **/issues.*
-**/analysis_output.*
+**/analysis_output.txt
