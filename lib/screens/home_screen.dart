@@ -38,7 +38,7 @@ class HomeScreen extends StatelessWidget {
     final isWide = screenWidth > 800;
 
     return Scaffold(
-      // drawer: _buildDrawer(context, provider), // Temporarily disabled Save Details feature
+      drawer: _buildDrawer(context, provider),
       body: Builder(builder: (scaffoldContext) {
         return Container(
           decoration: BoxDecoration(
@@ -129,12 +129,12 @@ class HomeScreen extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: isNarrow ? 8 : 24, vertical: 16),
       child: Row(
         children: [
-          /* IconButton(
+          IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () {
               Scaffold.of(context).openDrawer();
             },
-          ), */
+          ),
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
@@ -172,7 +172,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           if (isNarrow) ...[
-            /* IconButton(
+            IconButton(
               onPressed: () async {
                 await provider.saveCurrentProfile();
                 if (provider.errorMessage.contains('success')) {
@@ -189,7 +189,7 @@ class HomeScreen extends StatelessWidget {
               icon: const Icon(Icons.save, size: 22),
               color: theme.colorScheme.primary,
               tooltip: 'Save Details',
-            ), */
+            ),
             IconButton(
               onPressed: () {
                 provider.resetAll();
@@ -199,7 +199,7 @@ class HomeScreen extends StatelessWidget {
               tooltip: 'New Profile',
             ),
           ] else ...[
-            /* TextButton.icon(
+            TextButton.icon(
               onPressed: () async {
                 await provider.saveCurrentProfile();
                 if (provider.errorMessage.contains('success')) {
@@ -218,7 +218,7 @@ class HomeScreen extends StatelessWidget {
               style: TextButton.styleFrom(
                 foregroundColor: theme.colorScheme.primary,
               ),
-            ), */
+            ),
             TextButton.icon(
               onPressed: () {
                 provider.resetAll();
@@ -290,12 +290,9 @@ class HomeScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final profile = provider.savedProfiles[index];
                       return ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                          child: Icon(Icons.person, color: Theme.of(context).colorScheme.primary),
-                        ),
-                        title: Text('Profile ${profile.id}'),
-                        subtitle: Text(profile.createdAt.split('T').first),
+                        leading: const Icon(Icons.person_outline),
+                        title: Text(profile.name.isNotEmpty ? profile.name : 'Profile ${profile.id}'),
+                        subtitle: Text(profile.createdAt.split('T')[0]),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete_outline, color: Colors.red),
                           onPressed: () async {

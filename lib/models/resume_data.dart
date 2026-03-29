@@ -203,6 +203,7 @@ class ResumeResponse {
 class SavedProfile {
   final int id;
   final String userId;
+  final String name;
   final String createdAt;
   final List<Education> education;
   final List<String> skills;
@@ -214,6 +215,7 @@ class SavedProfile {
   SavedProfile({
     required this.id,
     required this.userId,
+    required this.name,
     required this.createdAt,
     this.education = const [],
     this.skills = const [],
@@ -227,6 +229,7 @@ class SavedProfile {
     return SavedProfile(
       id: json['id'],
       userId: json['user_id'],
+      name: json['name'] ?? '',
       createdAt: json['created_at'],
       education: (json['education'] as List?)?.map((e) => Education(
         degree: e['degree'] ?? '',
