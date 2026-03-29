@@ -1,7 +1,6 @@
 // Step 3: Skills selection UI with role-based grouping.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/skill_data.dart';
 import '../../providers/resume_provider.dart';
 import '../../widgets/skill_checkbox_group.dart';
 
@@ -27,21 +26,29 @@ class SkillsStep extends StatelessWidget {
                   color: theme.colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.auto_awesome,
-                    color: theme.colorScheme.primary, size: 24),
+                child: Icon(
+                  Icons.auto_awesome,
+                  color: theme.colorScheme.primary,
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Select Your Skills',
-                        style: theme.textTheme.titleLarge
-                            ?.copyWith(fontWeight: FontWeight.bold)),
                     Text(
-                        'Choose skills that match your expertise. These will be matched against the job description.',
-                        style: theme.textTheme.bodySmall
-                            ?.copyWith(color: Colors.grey)),
+                      'Select Your Skills',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'Choose skills that match your expertise. These will be matched against the job description.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.grey,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -66,8 +73,11 @@ class SkillsStep extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.check_circle,
-                      color: theme.colorScheme.primary, size: 18),
+                  Icon(
+                    Icons.check_circle,
+                    color: theme.colorScheme.primary,
+                    size: 18,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     '${provider.resumeData.skills.length} skills selected',
@@ -121,7 +131,8 @@ class _CustomSkillInputState extends State<_CustomSkillInput> {
 
   void _addCustomSkill() {
     final skill = _controller.text.trim();
-    if (skill.isNotEmpty && !widget.provider.resumeData.skills.contains(skill)) {
+    if (skill.isNotEmpty &&
+        !widget.provider.resumeData.skills.contains(skill)) {
       widget.provider.toggleSkill(skill);
       _controller.clear();
     }
@@ -155,7 +166,9 @@ class _CustomSkillInputState extends State<_CustomSkillInput> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 10),
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
                     isDense: true,
                   ),
                   onSubmitted: (_) => _addCustomSkill(),
