@@ -82,7 +82,7 @@ class SkillsStep extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Skill categories
-          ...SkillData.skillsByCategory.entries.map((entry) {
+          ...provider.availableSkills.entries.map((entry) {
             return SkillCheckboxGroup(
               category: entry.key,
               skills: entry.value,

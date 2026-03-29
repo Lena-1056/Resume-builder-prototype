@@ -120,10 +120,27 @@ class ApiService {
     await http.delete(Uri.parse(url)).timeout(ApiConfig.requestTimeout);
   }
 
-  /// Analyze ATS score and optimize
-  static Future<AtsAnalysisResponse> analyzeAts(ResumeData data) async {
+  /// Get ATS score only (no optimization)
+  static Future<AtsScoreResponse> getAtsScore(ResumeData data) async {
     final response = await http.post(
-      Uri.parse(ApiConfig.analyzeAts),
+      Uri.parse(ApiConfig.atsScore),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(data.toJson()),
+    ).timeout(ApiConfig.requestTimeout);
+
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      return AtsScoreResponse.fromJson(jsonData);
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['detail'] ?? 'Failed to calculate ATS score');
+    }
+  }
+
+  /// Optimize resume for better ATS score
+  static Future<AtsAnalysisResponse> optimizeResume(ResumeData data) async {
+    final response = await http.post(
+      Uri.parse(ApiConfig.optimizeResume),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(data.toJson()),
     ).timeout(ApiConfig.requestTimeout);
@@ -133,7 +150,7 @@ class ApiService {
       return AtsAnalysisResponse.fromJson(jsonData);
     } else {
       final error = jsonDecode(response.body);
-      throw Exception(error['detail'] ?? 'Failed to analyze ATS');
+      throw Exception(error['detail'] ?? 'Failed to optimize resume');
     }
   }
 }

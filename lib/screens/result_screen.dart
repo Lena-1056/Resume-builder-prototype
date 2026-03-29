@@ -212,15 +212,11 @@ class ResultScreen extends StatelessWidget {
                       ? Center(child: CircularProgressIndicator(color: theme.colorScheme.primary))
                       : _actionButton(
                           context,
-                          icon: Icons.checklist_rtl,
+                          icon: Icons.speed,
                           label: 'ATS Score',
                           color: Colors.purple,
                           onPressed: () async {
-                            await provider.runAtsAnalysis();
-                            if (provider.atsResponse?.optimizedData != null) {
-                              // Regenerate the PDF now that the internal data changed
-                              await provider.generateResume();
-                            }
+                            await provider.calculateAtsScore();
                           },
                         ),
                   ),
@@ -228,11 +224,16 @@ class ResultScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // ATS Analysis
-              if (provider.atsResponse != null) ...[
-                _buildAtsScoreAnalysis(theme, provider.atsResponse!),
+              // ATS Score Card (Step 1: Score only)
+              if (provider.atsScoreResponse != null && provider.atsResponse == null)
+                _buildAtsScoreCard(context, theme, provider),
+
+              // ATS Optimization Card (Step 2: After optimization)
+              if (provider.atsResponse != null)
+                _buildAtsOptimizationCard(theme, provider),
+
+              if (provider.atsScoreResponse != null || provider.atsResponse != null)
                 const SizedBox(height: 24),
-              ],
 
               // Skills Analysis
               _buildSkillsAnalysis(theme, response),
@@ -329,7 +330,97 @@ class ResultScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAtsScoreAnalysis(ThemeData theme, atsResponse) {
+  /// Step 1: Score-only card with optional "Optimize Resume" button
+  Widget _buildAtsScoreCard(BuildContext context, ThemeData theme, ResumeProvider provider) {
+    final scoreResponse = provider.atsScoreResponse!;
+    final score = scoreResponse.initialScore;
+    final needsOptimization = score < 85;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: needsOptimization ? Colors.orange.shade50 : Colors.green.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: needsOptimization ? Colors.orange.shade200 : Colors.green.shade200,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.speed,
+                  color: needsOptimization ? Colors.orange.shade700 : Colors.green.shade700),
+              const SizedBox(width: 8),
+              Text('ATS Score',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: needsOptimization ? Colors.orange.shade900 : Colors.green.shade900,
+                  )),
+            ],
+          ),
+          const Divider(height: 24),
+          Center(child: _scoreCircle(score, 'Your Score', needsOptimization ? Colors.orange : Colors.green)),
+          const SizedBox(height: 16),
+          // Suggestions
+          ...scoreResponse.suggestions.map((s) => Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  needsOptimization ? Icons.info_outline : Icons.check_circle_outline,
+                  size: 16,
+                  color: needsOptimization ? Colors.orange.shade700 : Colors.green.shade700,
+                ),
+                const SizedBox(width: 8),
+                Expanded(child: Text(s, style: TextStyle(
+                  color: needsOptimization ? Colors.orange.shade900 : Colors.green.shade900,
+                  fontSize: 13,
+                ))),
+              ],
+            ),
+          )),
+          // Show "Optimize" button if score < 85%
+          if (needsOptimization) ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: provider.isOptimizing
+                ? const Center(child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: CircularProgressIndicator(),
+                  ))
+                : FilledButton.icon(
+                    onPressed: () async {
+                      await provider.optimizeResume();
+                      // Regenerate the resume with optimized data
+                      if (provider.atsResponse?.optimizedData != null) {
+                        await provider.generateResume();
+                      }
+                    },
+                    icon: const Icon(Icons.auto_fix_high),
+                    label: const Text('Optimize Resume'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.purple,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Step 2: Optimization result card with before/after scores
+  Widget _buildAtsOptimizationCard(ThemeData theme, ResumeProvider provider) {
+    final atsResponse = provider.atsResponse!;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -342,9 +433,9 @@ class ResultScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.score, color: Colors.purple.shade700),
+              Icon(Icons.auto_fix_high, color: Colors.purple.shade700),
               const SizedBox(width: 8),
-              Text('ATS Optimization',
+              Text('ATS Optimization Results',
                   style: theme.textTheme.titleMedium
                       ?.copyWith(fontWeight: FontWeight.bold, color: Colors.purple.shade900)),
             ],
@@ -353,11 +444,10 @@ class ResultScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _scoreCircle(atsResponse.initialScore, 'Initial Score', Colors.blue),
+              _scoreCircle(atsResponse.initialScore, 'Before', Colors.orange),
+              const Icon(Icons.arrow_forward, color: Colors.grey, size: 30),
               if (atsResponse.improvedScore != null)
-                const Icon(Icons.arrow_forward, color: Colors.grey, size: 30),
-              if (atsResponse.improvedScore != null)
-                _scoreCircle(atsResponse.improvedScore!, 'Optimized', Colors.green),
+                _scoreCircle(atsResponse.improvedScore!, 'After', Colors.green),
             ],
           ),
           if (atsResponse.suggestions.isNotEmpty) ...[

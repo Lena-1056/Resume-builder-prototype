@@ -107,6 +107,8 @@ class ResumeData {
   String? github;
   String? linkedin;
   String? portfolio;
+  String summary;
+  String jobDescription;
 
   // Sections
   List<Education> education;
@@ -117,7 +119,6 @@ class ResumeData {
 
   // Skills & JD
   List<String> skills;
-  String jobDescription;
 
   ResumeData({
     this.name = '',
@@ -126,13 +127,14 @@ class ResumeData {
     this.github,
     this.linkedin,
     this.portfolio,
+    this.summary = '',
+    this.jobDescription = '',
     List<Education>? education,
     List<Project>? projects,
     List<Internship>? internships,
     List<Certification>? certifications,
     List<ExtraActivity>? extraActivities,
     List<String>? skills,
-    this.jobDescription = '',
   })  : education = education ?? [Education()],
         projects = projects ?? [Project()],
         internships = internships ?? [Internship()],
@@ -160,6 +162,7 @@ class ResumeData {
       'github': (github?.trim().isNotEmpty ?? false) ? github : null,
       'linkedin': (linkedin?.trim().isNotEmpty ?? false) ? linkedin : null,
       'portfolio': (portfolio?.trim().isNotEmpty ?? false) ? portfolio : null,
+      'summary': summary,
       'education': filledEducation.map((e) => e.toJson()).toList(),
       'projects': filledProjects.map((p) => p.toJson()).toList(),
       'internships': filledInternships.map((i) => i.toJson()).toList(),
@@ -204,6 +207,7 @@ class SavedProfile {
   final int id;
   final String userId;
   final String name;
+  final String summary;
   final String createdAt;
   final List<Education> education;
   final List<String> skills;
@@ -216,6 +220,7 @@ class SavedProfile {
     required this.id,
     required this.userId,
     required this.name,
+    this.summary = '',
     required this.createdAt,
     this.education = const [],
     this.skills = const [],
@@ -230,6 +235,7 @@ class SavedProfile {
       id: json['id'],
       userId: json['user_id'],
       name: json['name'] ?? '',
+      summary: json['summary'] ?? '',
       createdAt: json['created_at'],
       education: (json['education'] as List?)?.map((e) => Education(
         degree: e['degree'] ?? '',
@@ -264,6 +270,23 @@ class SavedProfile {
   }
 }
 
+class AtsScoreResponse {
+  final int initialScore;
+  final List<String> suggestions;
+
+  AtsScoreResponse({
+    required this.initialScore,
+    this.suggestions = const [],
+  });
+
+  factory AtsScoreResponse.fromJson(Map<String, dynamic> json) {
+    return AtsScoreResponse(
+      initialScore: json['initial_score'] ?? 0,
+      suggestions: List<String>.from(json['suggestions'] ?? []),
+    );
+  }
+}
+
 class AtsAnalysisResponse {
   final int initialScore;
   final int? improvedScore;
@@ -288,6 +311,8 @@ class AtsAnalysisResponse {
         github: bData['github'],
         linkedin: bData['linkedin'],
         portfolio: bData['portfolio'],
+        summary: bData['summary'] ?? '',
+        jobDescription: bData['job_description'] ?? '',
         education: (bData['education'] as List?)?.map((e) => Education(
           degree: e['degree'] ?? '',
           institution: e['institution'] ?? '',
@@ -317,7 +342,6 @@ class AtsAnalysisResponse {
           title: e['title'] ?? '',
           description: e['description'] ?? '',
         )).toList(),
-        jobDescription: bData['job_description'] ?? '',
       );
     }
     return AtsAnalysisResponse(

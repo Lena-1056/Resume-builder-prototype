@@ -10,7 +10,8 @@ class ApiConfig {
   static const String saveDetails = '$baseUrl/save-details';
   static const String savedDetails = '$baseUrl/saved-details';
   static const String deleteDetails = '$baseUrl/delete-details';
-  static const String analyzeAts = '$baseUrl/analyze-ats';
+  static const String atsScore = '$baseUrl/ats-score';
+  static const String optimizeResume = '$baseUrl/optimize-resume';
 
   // Timeouts
   static const Duration requestTimeout = Duration(seconds: 60);
